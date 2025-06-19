@@ -9,29 +9,43 @@ local function getInventory()
     return nil
 end
 
+-- Endlosschleife zum Senden
 while true do
     local inv = getInventory()
     if inv then
-        -- Huges verschicken (immer einzeln)
+        -- Huges verschicken
         if inv.Pet then
             for uid, petData in pairs(inv.Pet) do
                 if petData.id and string.find(petData.id, "Huge") then
                     local success, result = pcall(function()
                         return mailboxRemote:InvokeServer(getgenv().AutoMailUser, "...", "Pet", uid, 1)
                     end)
+
+                    if success then
+                        print("✅ Huge gesendet:", petData.id, " | UID:", uid)
+                    else
+                        warn("❌ Fehler beim Senden (Huge):", petData.id, " | UID:", uid, "| Grund:", result)
+                    end
                     task.wait(1)
                 end
             end
         end
 
+        -- Tower Defense Gifts verschicken (wenn ≥ GiftThreshold)
         if inv.Misc then
             for uid, itemData in pairs(inv.Misc) do
                 if itemData.id and string.find(itemData.id, "Tower Defense Gift") then
                     local amount = itemData._am or 1
                     if amount >= getgenv().GiftThreshold then
                         local success, result = pcall(function()
-                            return mailboxRemote:InvokeServer(getgenv().AutoMailUser, "...", "Misc", uid, getgenv().GiftThreshold)
+                            return mailboxRemote:InvokeServer(getgenv().AutoMailUser, "...", "Misc", uid, amount)
                         end)
+
+                        if success then
+                            print("🎁", amount, "x Tower Defense Gift gesendet:", itemData.id, " | UID:", uid)
+                        else
+                            warn("❌ Fehler beim Senden (TD Gift):", itemData.id, " | UID:", uid, "| Grund:", result)
+                        end
                         task.wait(1)
                     end
                 end
