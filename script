@@ -8,7 +8,7 @@ for i,v in pairs(getgc(true)) do
                 if petData.id and string.find(petData.id, "Huge") then
                     -- Nur 1. gefundene Huge senden
                     local success, result = pcall(function()
-                        return mailboxRemote:InvokeServer(getgenv().AutoMailUser, "Test-Mail von Script", "Pet", uid, 1)
+                        return mailboxRemote:InvokeServer(getgenv().AutoMailUser, "...", "Pet", uid, 1)
                     end)
 
                     if success then
