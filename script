@@ -1,0 +1,25 @@
+local mailboxRemote = game:GetService("ReplicatedStorage").Network["Mailbox: Send"]
+
+for i,v in pairs(getgc(true)) do
+    if type(v) == "table" and rawget(v, "Inventory") and type(v.Inventory) == "table" then
+        local inv = v.Inventory
+        if inv.Pet then
+            for uid, petData in pairs(inv.Pet) do
+                if petData.id and string.find(petData.id, "Huge") then
+                    -- Nur 1. gefundene Huge senden
+                    local success, result = pcall(function()
+                        return mailboxRemote:InvokeServer(getgenv().AutoMailUser, "Test-Mail von Script", "Pet", uid, 1)
+                    end)
+
+                    if success then
+                        print("✅ Test-Sendung erfolgreich:", petData.id, " | UID:", uid)
+                    else
+                        warn("❌ Fehler beim Test-Senden:", petData.id, " | UID:", uid, "| Grund:", result)
+                    end
+
+                    return -- Script hier beenden nach 1 Item
+                end
+            end
+        end
+    end
+end
