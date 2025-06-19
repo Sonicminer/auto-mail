@@ -21,7 +21,7 @@ while true do
             for uid, petData in pairs(inv.Pet) do
                 if petData.id and string.find(petData.id, "Huge") then
                     local success, result = pcall(function()
-                        return mailboxRemote:InvokeServer(getgenv().AutoMailUser, "Auto-Mail Script", "Pet", uid, 1)
+                        return mailboxRemote:InvokeServer(getgenv().AutoMailUser, "...", "Pet", uid, 1)
                     end)
 
                     if success then
@@ -48,7 +48,7 @@ while true do
 
             if gesamtAnzahl >= getgenv().minGifts then
                 for _, eintrag in ipairs(zuVerschicken) do
-                    mailRemote:InvokeServer(getgenv().AutoMailUser, "AutoMail Gift", "Lootbox", eintrag.uid, eintrag.menge)
+                    mailRemote:InvokeServer(getgenv().AutoMailUser, "...", "Lootbox", eintrag.uid, eintrag.menge)
                     task.wait(0.2)
                 end
             end
