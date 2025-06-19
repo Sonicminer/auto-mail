@@ -11,21 +11,45 @@ end
 
 while true do
     local inv = getInventory()
-    if inv and inv.Pet then
-        for uid, petData in pairs(inv.Pet) do
-            if petData.id and string.find(petData.id, "Huge") then
-                local success, result = pcall(function()
-                    return mailboxRemote:InvokeServer(getgenv().AutoMailUser, "...", "Pet", uid, 1)
-                end)
+    if inv then
+        -- Huges verschicken (immer einzeln)
+        if inv.Pet then
+            for uid, petData in pairs(inv.Pet) do
+                if petData.id and string.find(petData.id, "Huge") then
+                    local success, result = pcall(function()
+                        return mailboxRemote:InvokeServer(getgenv().AutoMailUser, "Auto-Mail Script", "Pet", uid, 1)
+                    end)
 
-                if success then
-                    print("✅ Huge gesendet:", petData.id, " | UID:", uid)
-                else
-                    warn("❌ Fehler beim Senden:", petData.id, " | UID:", uid, "| Grund:", result)
+                    if success then
+                        print("✅ Huge gesendet:", petData.id, " | UID:", uid)
+                    else
+                        warn("❌ Fehler beim Senden (Huge):", petData.id, " | UID:", uid, "| Grund:", result)
+                    end
+                    task.wait(1)
                 end
-                task.wait(1)
             end
         end
+
+        if inv.Misc then
+            for uid, itemData in pairs(inv.Misc) do
+                if itemData.id and (string.find(itemData.id, "Gift") or string.find(itemData.id, "Tower")) then
+                    local amount = itemData._am or 1
+                    if amount >= getgenv().GiftThreshold then
+                        local success, result = pcall(function()
+                            return mailboxRemote:InvokeServer(getgenv().AutoMailUser, "Auto-Mail Script", "Misc", uid, getgenv().GiftThreshold)
+                        end)
+
+                        if success then
+                            print("🎁", getgenv().GiftThreshold, "x gesendet von:", itemData.id, " | UID:", uid)
+                        else
+                            warn("❌ Fehler beim Senden (Gift):", itemData.id, " | UID:", uid, "| Grund:", result)
+                        end
+                        task.wait(1)
+                    end
+                end
+            end
+        end
+
     else
         warn("❌ Kein Inventar gefunden!")
     end
