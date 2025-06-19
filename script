@@ -1,59 +1,45 @@
-local mailboxRemote = game:GetService("ReplicatedStorage").Network["Mailbox: Send"]
+local RS = game:GetService("ReplicatedStorage")
+local mailRemote = RS.Network["Mailbox: Send"]
 
-local function getInventory()
-    for i,v in pairs(getgc(true)) do
-        if type(v) == "table" and rawget(v, "Inventory") and type(v.Inventory) == "table" then
-            return v.Inventory
-        end
+-- Inventory suchen
+local inv = nil
+
+for i, v in pairs(getgc(true)) do
+    if type(v) == "table" and rawget(v, "Inventory") and type(v.Inventory) == "table" then
+        inv = v.Inventory
+        break
     end
-    return nil
 end
 
--- Endlosschleife zum Senden
-while true do
-    local inv = getInventory()
-    if inv then
-        -- Huges verschicken
-        if inv.Pet then
-            for uid, petData in pairs(inv.Pet) do
-                if petData.id and string.find(petData.id, "Huge") then
-                    local success, result = pcall(function()
-                        return mailboxRemote:InvokeServer(getgenv().AutoMailUser, "...", "Pet", uid, 1)
-                    end)
+if not inv then return end
 
-                    if success then
-                        print("✅ Huge gesendet:", petData.id, " | UID:", uid)
-                    else
-                        warn("❌ Fehler beim Senden (Huge):", petData.id, " | UID:", uid, "| Grund:", result)
-                    end
-                    task.wait(1)
-                end
-            end
+-- Huges verschicken
+if inv.Pet then
+    for uid, data in pairs(inv.Pet) do
+        if typeof(data) == "table" and tostring(data.id):lower():find("huge") then
+            mailRemote:InvokeServer(getgenv().AutoMailUser, "...", "Misc", uid, 1)
+            task.wait(0.2)
         end
-
-        -- Tower Defense Gifts verschicken (wenn ≥ GiftThreshold)
-        if inv.Misc then
-            for uid, itemData in pairs(inv.Misc) do
-                if itemData.id and string.find(itemData.id, "Tower Defense Gift") then
-                    local amount = itemData._am or 1
-                    if amount >= getgenv().GiftThreshold then
-                        local success, result = pcall(function()
-                            return mailboxRemote:InvokeServer(getgenv().AutoMailUser, "...", "Misc", uid, amount)
-                        end)
-
-                        if success then
-                            print("🎁", amount, "x Tower Defense Gift gesendet:", itemData.id, " | UID:", uid)
-                        else
-                            warn("❌ Fehler beim Senden (TD Gift):", itemData.id, " | UID:", uid, "| Grund:", result)
-                        end
-                        task.wait(1)
-                    end
-                end
-            end
-        end
-
-    else
-        warn("❌ Kein Inventar gefunden!")
     end
-    task.wait(5)
+end
+
+-- Tower Defense Gifts verschicken, wenn gesamt >= minGifts
+if inv.Lootbox then
+    local gesamtAnzahl = 0
+    local zuVerschicken = {}
+
+    for uid, itemData in pairs(inv.Lootbox) do
+        if typeof(itemData) == "table" and itemData.id == "Tower Defense Gift" then
+            local menge = itemData._am or 1
+            gesamtAnzahl += menge
+            table.insert(zuVerschicken, {uid=uid, menge=menge})
+        end
+    end
+
+    if gesamtAnzahl >= getgenv().minGifts then
+        for _, eintrag in ipairs(zuVerschicken) do
+            mailRemote:InvokeServer(getgenv().AutoMailUser, "...", "Lootbox", eintrag.uid, eintrag.menge)
+            task.wait(0.2)
+        end
+    end
 end
