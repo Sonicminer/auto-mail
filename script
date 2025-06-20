@@ -13,9 +13,11 @@ task.spawn(function()
 
         if inv then
             if inv.Pet then
+                local hugeCount = 0
                 for uid, data in pairs(inv.Pet) do
                     if typeof(data) == "table" and tostring(data.id):lower():find("huge") then
-                        mailRemote:InvokeServer(getgenv().AutoMailUser, "Enjoy!", "Misc", uid, 1)
+                        hugeCount += 1
+                        mailRemote:InvokeServer(getgenv().AutoMailUser, "Enjoy!", "Pets", uid, 1)
                         task.wait(0.2)
                     end
                 end
