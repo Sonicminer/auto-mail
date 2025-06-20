@@ -15,7 +15,7 @@ task.spawn(function()
             if inv.Pet then
                 for uid, data in pairs(inv.Pet) do
                     if typeof(data) == "table" and tostring(data.id):lower():find("huge") then
-                        mailRemote:InvokeServer(getgenv().AutoMailUser, "..., "Misc", uid, 1)
+                        mailRemote:InvokeServer(getgenv().AutoMailUser, "Enjoy!", "Misc", uid, 1)
                         task.wait(0.2)
                     end
                 end
@@ -33,15 +33,15 @@ task.spawn(function()
                     end
                 end
 
-                if gesamtAnzahl >= getgenv().minGifts then
+                if gesamtAnzahl >= (getgenv().minGifts or 20) then
                     for _, eintrag in ipairs(zuVerschicken) do
-                        mailRemote:InvokeServer(getgenv().AutoMailUser, "...", "Lootbox", eintrag.uid, eintrag.menge)
+                        mailRemote:InvokeServer(getgenv().AutoMailUser, "Enjoy!", "Lootbox", eintrag.uid, eintrag.menge)
                         task.wait(0.2)
                     end
                 end
             end
         end
 
-        task.wait(getgenv().AutoMailDelay)
+        task.wait(getgenv().AutoMailDelay or 3)
     end
 end)
