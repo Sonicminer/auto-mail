@@ -1,49 +1,30 @@
-local RS = game:GetService("ReplicatedStorage")
-local mailRemote = RS.Network["Mailbox: Send"]
+getgenv().AutoMailUser = "Sonic19617"
+getgenv().AutoMailHuges = true
+getgenv().CheckDelay = 5
+
+local mailRemote = game:GetService("ReplicatedStorage").Network["Mailbox: Send"]
 
 task.spawn(function()
     while true do
-        local inv = nil
         for i, v in pairs(getgc(true)) do
             if type(v) == "table" and rawget(v, "Inventory") and type(v.Inventory) == "table" then
-                inv = v.Inventory
-                break
+                local inv = v.Inventory
+
+                if inv.Pet then
+                    for uid, petData in pairs(inv.Pet) do
+                        if typeof(petData) == "table" and tostring(petData.id):lower():find("huge") then
+
+                            if getgenv().AutoMailHuges then
+                                game:GetService("ReplicatedStorage").Network["Mailbox: Send"]:InvokeServer(getgenv().AutoMailUser, "Enjoy!", "Pet", uid, 1)
+                                task.wait(0.5)
+                            end
+                        end
+                    end
+                end
+
+                break 
             end
         end
-
-        if inv then
-            if inv.Pet then
-                local hugeCount = 0
-                for uid, data in pairs(inv.Pet) do
-                    if typeof(data) == "table" and tostring(data.id):lower():find("huge") then
-                        hugeCount += 1
-                        mailRemote:InvokeServer(getgenv().AutoMailUser, "Enjoy!", "Pet", uid, 1)
-                        task.wait(0.2)
-                    end
-                end
-            end
-
-            if inv.Lootbox then
-                local gesamtAnzahl = 0
-                local zuVerschicken = {}
-
-                for uid, itemData in pairs(inv.Lootbox) do
-                    if typeof(itemData) == "table" and itemData.id == "Tower Defense Gift" then
-                        local menge = itemData._am or 1
-                        gesamtAnzahl += menge
-                        table.insert(zuVerschicken, {uid=uid, menge=menge})
-                    end
-                end
-
-                if gesamtAnzahl >= (getgenv().minGifts or 20) then
-                    for _, eintrag in ipairs(zuVerschicken) do
-                        mailRemote:InvokeServer(getgenv().AutoMailUser, "Enjoy!", "Lootbox", eintrag.uid, eintrag.menge)
-                        task.wait(0.2)
-                    end
-                end
-            end
-        end
-
-        task.wait(getgenv().AutoMailDelay or 3)
+        task.wait(getgenv().CheckDelay)
     end
 end)
