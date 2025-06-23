@@ -1,3 +1,6 @@
+getgenv().AutoMailHuges = true
+getgenv().CheckDelay = 5
+
 local mailRemote = game:GetService("ReplicatedStorage").Network["Mailbox: Send"]
 
 task.spawn(function()
