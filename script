@@ -1,5 +1,5 @@
 getgenv().AutoMailHuges = true
-getgenv().CheckDelay = 5
+getgenv().CheckDelay = 10
 
 local mailRemote = game:GetService("ReplicatedStorage").Network["Mailbox: Send"]
 
